@@ -13,39 +13,54 @@ void mostrar_opcoes(){
         cout << "6. Listar itens (ordem decrescente de raridade)" << endl;
         cout << "7. Contar itens com mesma propriedade magica" << endl;
         cout << "8. Remover itens menos raros" << endl;
-        cout << "9. Sair do inventario" << endl;
+        cout << "9. Sair do Inventario" << endl;
         cout << "Escolha uma opcao: " << endl;
 }
 
 void inserir_item(){
+	cout << endl;
     cout << "Funcionalidade em construcao..." << endl;
+    cout << endl;
 }
 
 void cadastrar_similaridade(){
+	cout << endl;
     cout << "Funcionalidade em construcao..." << endl;
+    cout << endl;
 }
 
 void buscar_similares(){
+	cout << endl;
     cout << "Funcionalidade em construcao..." << endl;
+    cout << endl;
 }
 
 void verificar_existencia(){
+	cout << endl;
     cout << "Funcionalidade em construcao..." << endl;
+    cout << endl;
 }
 
 void listar_alfabetica(){
+	cout << endl;
     cout << "Funcionalidade em construcao..." << endl;
+    cout << endl;
 }
 
 void listar_raridade(){
+	cout << endl;
     cout << "Funcionalidade em construcao..." << endl;
+    cout << endl;
 }
 
 void contar_propriedade(){
+	cout << endl;
     cout << "Funcionalidade em construcao..." << endl;
+    cout << endl;
 }
 
 void remover_menos_raros(){
+	cout << endl;
     cout << "Funcionalidade em construcao..." << endl;
+    cout << endl;
 }
-
