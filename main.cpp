@@ -13,8 +13,11 @@ using namespace std;
 int main(){
     int opcao;
 
+
     mostrar_opcoes();
 
+    while(true)
+    {
     cin >> opcao;
     switch(opcao){
             case 1: inserir_item(); break;
@@ -25,8 +28,10 @@ int main(){
             case 6: listar_raridade(); break;
             case 7: contar_propriedade(); break;
             case 8: remover_menos_raros(); break;
+            case 9: return 0;
             default: cout << "Opcao invalida!" << endl;
+            
     }
- 
+    }
     return 0;
 }

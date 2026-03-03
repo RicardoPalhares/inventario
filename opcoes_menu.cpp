@@ -13,6 +13,7 @@ void mostrar_opcoes(){
         cout << "6. Listar itens (ordem decrescente de raridade)" << endl;
         cout << "7. Contar itens com mesma propriedade magica" << endl;
         cout << "8. Remover itens menos raros" << endl;
+        cout << "9. Sair do inventario" << endl;
         cout << "Escolha uma opcao: " << endl;
 }
 
@@ -47,3 +48,4 @@ void contar_propriedade(){
 void remover_menos_raros(){
     cout << "Funcionalidade em construcao..." << endl;
 }
+
