@@ -6,7 +6,7 @@ No terminal
 ```
 
 # Compilar
-g++ src/main.cpp -o main
+g++ main.cpp opcoes_menu.cpp -o main
 
 # Rodar 
 ./main
