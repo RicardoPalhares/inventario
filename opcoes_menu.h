@@ -1,12 +1,13 @@
 #ifndef OPCOES_MENU_H
 #define OPCOES_MENU_H
 #include <string>
+using namespace std;
 
 struct item
 {
-	std::string nome;
-	std::string dono;
-	std::string propriedade_magica;
+	string nome;
+	string dono;
+	string propriedade_magica;
 	int raridade;
 };
 
