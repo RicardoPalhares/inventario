@@ -21,16 +21,16 @@ void inserir_item(item i){
 	cout << endl;
     cout << "Insira os dados:" << endl;
     cout << "Nome do item: ";
-    getline(cin >> ws, item.nome);
+    getline(cin >> ws, i.nome);
     cout << endl;
     cout << "Nome do dono: ";
-    getline(cin >> ws, item.dono);
+    getline(cin >> ws, i.dono);
     cout << endl;
     cout << "Propriedade magica: ";
-    getline(cin >> ws, item.propriedade_magica);
+    getline(cin >> ws, i.propriedade_magica);
     cout << endl;
     cout << "Raridade: ";
-    cin >> item.raridade;
+    cin >> i.raridade;
     cout << endl;
 }
 

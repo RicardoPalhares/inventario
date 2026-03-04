@@ -4,14 +4,14 @@
 
 struct item
 {
-	string nome;
-	string dono;
-	string propriedade_magica;
+	std::string nome;
+	std::string dono;
+	std::string propriedade_magica;
 	int raridade;
-}
+};
 
 void mostrar_opcoes();
-void inserir_item();
+void inserir_item(item i);
 void cadastrar_similaridade();
 void buscar_similares();
 void verificar_existencia();
