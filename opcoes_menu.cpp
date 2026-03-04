@@ -17,9 +17,20 @@ void mostrar_opcoes(){
         cout << "Escolha uma opcao: " << endl;
 }
 
-void inserir_item(){
+void inserir_item(item i){
 	cout << endl;
-    cout << "Funcionalidade em construcao..." << endl;
+    cout << "Insira os dados:" << endl;
+    cout << "Nome do item: ";
+    getline(cin >> ws, i.nome);
+    cout << endl;
+    cout << "Nome do dono: ";
+    getline(cin >> ws, i.dono);
+    cout << endl;
+    cout << "Propriedade magica: ";
+    getline(cin >> ws, i.propriedade_magica);
+    cout << endl;
+    cout << "Raridade: ";
+    cin >> i.raridade;
     cout << endl;
 }
 
@@ -63,4 +74,5 @@ void remover_menos_raros(){
 	cout << endl;
     cout << "Funcionalidade em construcao..." << endl;
     cout << endl;
+
 }
