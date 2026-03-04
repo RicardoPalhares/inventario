@@ -1,5 +1,6 @@
 #ifndef OPCOES_MENU_H
 #define OPCOES_MENU_H
+#include <string>
 
 struct item
 {
@@ -21,3 +22,4 @@ void remover_menos_raros();
 
 
 #endif
+
