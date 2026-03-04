@@ -1,5 +1,5 @@
 // Leonardo Lopes Prado - 809
-// Gabriel Greg�rio de Olveira - 2324
+// Gabriel Gregório de Olveira - 2324
 // Isaac Assis Costa Lopes - 2314 
 // Ricardo de Oliveira Palhares - 2294
 // Gabriel Genghini Craveiro - 2274
@@ -25,7 +25,7 @@ int main(){
             cout << "Por favor, digite um numero!" << endl;
             cout << endl;
             cin.clear(); // Limpa o estado de erro do cin
-            cin.ignore(1000, '\n'); // Descarta a entrada inv�lida
+            cin.ignore(1000, '\n'); // Descarta a entrada inválida
             continue;
         }
     	
