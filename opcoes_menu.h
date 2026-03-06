@@ -12,7 +12,7 @@ struct item
 };
 
 void mostrar_opcoes();
-void inserir_item(item i);
+void inserir_item(item itens[]);
 void cadastrar_similaridade();
 void buscar_similares();
 void verificar_existencia();

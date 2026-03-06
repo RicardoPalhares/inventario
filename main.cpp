@@ -13,7 +13,7 @@ using namespace std;
 
 int main(){
     int opcao;
-    item itens;
+    item itens[50];
 	
 	while(true)
 	{

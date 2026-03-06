@@ -17,21 +17,24 @@ void mostrar_opcoes(){
         cout << "Escolha uma opcao: " << endl;
 }
 
-void inserir_item(item itens){
+
+int id_item = 0;
+void inserir_item(item itens[]){
 	cout << endl;
     cout << "Insira os dados:" << endl;
     cout << "Nome do item: ";
-    getline(cin >> ws, itens.nome);
+    getline(cin >> ws, itens[id_item].nome);
     cout << endl;
     cout << "Nome do dono: ";
-    getline(cin >> ws, itens.dono);
+    getline(cin >> ws, itens[id_item].dono);
     cout << endl;
     cout << "Propriedade magica: ";
-    getline(cin >> ws, itens.propriedade_magica);
+    getline(cin >> ws, itens[id_item].propriedade_magica);
     cout << endl;
     cout << "Raridade: ";
-    cin >> itens.raridade;
+    cin >> itens[id_item].raridade;
     cout << endl;
+    id_item++; 
 }
 
 void cadastrar_similaridade(){
