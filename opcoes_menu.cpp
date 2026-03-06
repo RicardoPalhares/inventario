@@ -17,20 +17,20 @@ void mostrar_opcoes(){
         cout << "Escolha uma opcao: " << endl;
 }
 
-void inserir_item(item i){
+void inserir_item(item itens){
 	cout << endl;
     cout << "Insira os dados:" << endl;
     cout << "Nome do item: ";
-    getline(cin >> ws, i.nome);
+    getline(cin >> ws, itens.nome);
     cout << endl;
     cout << "Nome do dono: ";
-    getline(cin >> ws, i.dono);
+    getline(cin >> ws, itens.dono);
     cout << endl;
     cout << "Propriedade magica: ";
-    getline(cin >> ws, i.propriedade_magica);
+    getline(cin >> ws, itens.propriedade_magica);
     cout << endl;
     cout << "Raridade: ";
-    cin >> i.raridade;
+    cin >> itens.raridade;
     cout << endl;
 }
 
