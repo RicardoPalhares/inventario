@@ -33,6 +33,10 @@ void inserir_item(item itens[]){
     cout << endl;
     cout << "Raridade: ";
     cin >> itens[id_item].raridade;
+    while(itens[id_item].raridade < 0 || itens[id_item].raridade > 100){
+        cout << "Raridade (0 a 100): ";
+        cin >> itens[id_item].raridade;
+    }
     cout << endl;
     id_item++; 
 }
