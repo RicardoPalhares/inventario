@@ -12,7 +12,7 @@ void mostrar_opcoes(){
         cout << "4. Verificar a existencia de um item" << endl;
         cout << "5. Listar itens (ordem alfabetica de nome)" << endl;
         cout << "6. Listar itens (ordem decrescente de raridade)" << endl;
-        cout << "7. Contar itens com mesma categoria" << endl;
+        cout << "7. Contar itens com mesma propriedade magica" << endl;
         cout << "8. Remover itens menos raros" << endl;
         cout << "9. Sair" << endl;
         cout << "Escolha uma opcao: " << endl;
@@ -24,25 +24,44 @@ list<Aresta> grafo[1000];
 int id = 0;
 int N = 0;
 void inserir_item(){
-	string nome_item, dono, categoria;
+	
+	string nome_item, dono, propriedade_magica;
 	int raridade;
-    cout << "Insira os dados dos itens na ordem: nome do item, dono, categoria, raridade" << endl;
-    cin >> nome_item >> dono >> categoria >> raridade;
-    
-    if(raridade < 0 || raridade > 100){
-		while(raridade < 0 || raridade > 100){ // validacao do nivel de raridade
+	
+    cout << "-INSIRA OS ITENS-" << endl;
+    cout << endl <<  "nome do item: " << endl;
+    getline (cin >> ws, nome_item);
+    cout << endl << "dono: " << endl;
+    cin >> dono;
+    cout << endl <<  "propriedade magica" << endl;
+    cin >> propriedade_magica;
+    cout << endl <<  "raridade [0 a 100]" << endl;
+    while(true)
+	{
+		if (!(cin >> raridade)) 
+		{
+    		cout << endl;
+            cout << "Por favor, digite um numero!" << endl;
+            cout << "Digite o valor correto de raridade: ";
+            cout << endl;
+            cin.clear(); // Limpa o estado de erro do cin
+            cin.ignore(1000, '\n'); // Descarta a entrada inv?lida
+		}
+		else if(raridade < 0 || raridade > 100){
+			cout << endl;
 			cout << "O nivel de raridade deve ser no minimo 0 e no maximo 100!" << endl;
 			cout << "Digite o valor correto de raridade: ";
-			cin >> raridade;
+			cout << endl;
 		}
+		else break;
 	}
-	else{
-		itens[id] = {id, nome_item, dono, categoria, raridade};
-    	cout << nome_item << " inserido(a) na Bolsa Devoradora" << endl;
-    	cout << endl;
-    	id++;
-    	N++;
-	}
+
+	itens[id] = {id, nome_item, dono, propriedade_magica, raridade};
+	cout << endl;
+	cout << nome_item << " foi inserido(a) na Bolsa Devoradora, seu id sera: " << id << endl;
+ 	cout << endl;
+ 	id++;
+ 	N++;
 }
 
 void cadastrar_similaridade(){
@@ -50,7 +69,7 @@ void cadastrar_similaridade(){
 	int id1, id2; //papel de  origem, destino
 	string op;
 		
-	cout << "Insira os ids (id em ordem de inserção) dos item a serem cadastrados com similaridade: " << endl;
+	cout << "Insira os ids dos item a serem cadastrados com similaridade: " << endl;
 	cin >> id1 >> id2;
 	if((id1 < N && id1 >= 0) && (id2 < N && id2 >= 0)){
 		cout << "Itens a serem cadastrados: " << id1 << " -> " << itens[id1].nome << ", " << id2 << " -> " << itens[id2].nome << endl;
@@ -101,8 +120,6 @@ void buscar_similares(){
         }
     }
 
-	cout << endl;
-
     if(encontrou == false){
         cout << "Nenhum item encontrado com esses criterios." << endl;
     }
@@ -114,8 +131,14 @@ void verificar_existencia(){
 
 void listar_ordem_alfabetica(){
 	// apenas teste para verificar o autoincremento do id nos itens
-    for(int i = 0; i < N; i++){
-		cout << itens[i].id << ", " << itens[i].nome << ", " << itens[i].dono << ", " << itens[i].propriedade_magica << ", " << itens[i].raridade << endl;
+    cout << endl << "-- ITEMS DENTRO DO INVENTARIO --" << endl; 
+	for(int i = 0; i < N; i++){
+	 	cout << endl <<  "| ID: " << itens[i].id << endl;
+        cout << "| Nome: " << itens[i].nome << endl;
+        cout << "| Dono: " << itens[i].dono << endl;
+        cout << "| Propriedade: " << itens[i].propriedade_magica << endl;
+        cout << "| Raridade: " << itens[i].raridade << endl;
+        cout << endl;
 	}
 }
 
