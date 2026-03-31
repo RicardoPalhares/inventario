@@ -12,7 +12,7 @@ void mostrar_opcoes(){
         cout << "4. Verificar a existencia de um item" << endl;
         cout << "5. Listar itens (ordem alfabetica de nome)" << endl;
         cout << "6. Listar itens (ordem decrescente de raridade)" << endl;
-        cout << "7. Contar itens com mesma propriedade magica" << endl;
+        cout << "7. Contar itens com mesma categoria" << endl;
         cout << "8. Remover itens menos raros" << endl;
         cout << "9. Sair" << endl;
         cout << "Escolha uma opcao: " << endl;
@@ -24,10 +24,10 @@ list<Aresta> grafo[1000];
 int id = 0;
 int N = 0;
 void inserir_item(){
-	string nome_item, dono, propriedade_magica;
+	string nome_item, dono, categoria;
 	int raridade;
-    cout << "Insira os dados dos itens na ordem: nome do item, dono, propriedade magica, raridade" << endl;
-    cin >> nome_item >> dono >> propriedade_magica >> raridade;
+    cout << "Insira os dados dos itens na ordem: nome do item, dono, categoria, raridade" << endl;
+    cin >> nome_item >> dono >> categoria >> raridade;
     
     if(raridade < 0 || raridade > 100){
 		while(raridade < 0 || raridade > 100){ // validacao do nivel de raridade
@@ -37,7 +37,7 @@ void inserir_item(){
 		}
 	}
 	else{
-		itens[id] = {id, nome_item, dono, propriedade_magica, raridade};
+		itens[id] = {id, nome_item, dono, categoria, raridade};
     	cout << nome_item << " inserido(a) na Bolsa Devoradora" << endl;
     	cout << endl;
     	id++;
@@ -50,7 +50,7 @@ void cadastrar_similaridade(){
 	int id1, id2; //papel de  origem, destino
 	string op;
 		
-	cout << "Insira os ids dos item a serem cadastrados com similaridade: " << endl;
+	cout << "Insira os ids (id em ordem de inserção) dos item a serem cadastrados com similaridade: " << endl;
 	cin >> id1 >> id2;
 	if((id1 < N && id1 >= 0) && (id2 < N && id2 >= 0)){
 		cout << "Itens a serem cadastrados: " << id1 << " -> " << itens[id1].nome << ", " << id2 << " -> " << itens[id2].nome << endl;
@@ -100,6 +100,8 @@ void buscar_similares(){
             }
         }
     }
+
+	cout << endl;
 
     if(encontrou == false){
         cout << "Nenhum item encontrado com esses criterios." << endl;
