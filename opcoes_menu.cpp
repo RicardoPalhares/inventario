@@ -132,8 +132,10 @@ void verificar_existencia(){
 }
 
 void listar_ordem_alfabetica(){
+
+    cout << "Funcionalidade em construcao..." << endl;
 	// apenas teste para verificar o autoincremento do id nos itens
-    cout << endl << "-- ITEMS DENTRO DO INVENTARIO --" << endl; 
+   /* cout << endl << "-- ITEMS DENTRO DO INVENTARIO --" << endl; 
 	for(int i = 0; i < N; i++){
 	 	cout << endl <<  "| ID: " << itens[i].id << endl;
         cout << "| Nome: " << itens[i].nome << endl;
@@ -141,7 +143,7 @@ void listar_ordem_alfabetica(){
         cout << "| Propriedade: " << itens[i].propriedade_magica << endl;
         cout << "| Raridade: " << itens[i].raridade << endl;
         cout << endl;
-	}
+	}*/
 }
 
 void listar_ordem_raridade(){
