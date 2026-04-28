@@ -121,8 +121,10 @@ void buscar_similares(){
     }
 
     if(encontrou == false){
-        cout << "Nenhum item encontrado com esses criterios." << endl;
+        cout << "Nenhum item encontrado com esses criterios.";
     }
+
+    cout << endl;
 }
 
 void verificar_existencia(){
