@@ -12,6 +12,8 @@
 using namespace std;
 
 int main(){
+	treenode * root = NULL;
+	
     int opcao;
 	
 	while(true)
@@ -30,11 +32,11 @@ int main(){
     	
 		switch(opcao)
 		{
-            case 1: inserir_item(); break;
+            case 1: inserir_item(root); break;
             case 2: cadastrar_similaridade(); break;
             case 3: buscar_similares(); break;
-            case 4: verificar_existencia(); break;
-            case 5: listar_ordem_alfabetica(); break;
+            case 4: verificar_existencia(root); break;
+            case 5: listar_ordem_alfabetica(root); break;
             case 6: listar_ordem_raridade(); break;
             case 7: contar_propriedade(); break;
             case 8: remover_menos_raros(); break;
