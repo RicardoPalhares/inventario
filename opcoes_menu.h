@@ -20,6 +20,7 @@ struct Item {
 
     Ponto contorno[100];
     int num_pontos;
+    bool ativo;
 };
 
 struct Aresta {
@@ -56,5 +57,8 @@ void contar_propriedade();
 void remover_menos_raros(treenodeptr &root);
 void remover_nome(treenodeptr &p, string nome);
 treenodeptr menor(treenodeptr p);
+double area_triangulo(Ponto a, Ponto b, Ponto c);
+int orientacao(Ponto p1, Ponto p2, Ponto p3);
+bool poligono_convexo(Ponto p[], int n);
 
 #endif

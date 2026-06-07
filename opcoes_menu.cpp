@@ -71,7 +71,7 @@ void inserir_item(treenodeptr &root){
     cout << endl <<  "nome do item: " << endl;
     getline (cin >> ws, nome_item);
     
-   tInsert(root, nome_item);
+   
     
     cout << endl << "dono: " << endl;
     cin >> dono;
@@ -98,7 +98,50 @@ void inserir_item(treenodeptr &root){
 		else break;
 	}
 
-	itens[id] = {id, nome_item, dono, propriedade_magica, raridade};
+    int qtd;
+
+    cout << "Quantidade de pontos do contorno: ";
+    cin >> qtd;
+
+    while(qtd < 3){
+        cout << "Poligonos precisam de pelo menos 3 pontos: ";
+        cin >> qtd;
+    }
+
+    Ponto pontos[100];
+
+    for(int i=0;i<qtd;i++){
+
+        cout << "Ponto " << i+1 << ": ";
+
+        cin >> pontos[i].x >> pontos[i].y;
+    }
+
+    if(!poligono_convexo(pontos, qtd)){
+
+        cout << endl;
+        cout << "Item rejeitado." << endl;
+        cout << "O contorno informado nao forma um poligono convexo." << endl;
+        cout << endl;
+
+        return;
+    }
+
+    tInsert(root, nome_item);
+
+    itens[id].id = id;
+    itens[id].nome = nome_item;
+    itens[id].dono = dono;
+    itens[id].propriedade_magica = propriedade_magica;
+    itens[id].raridade = raridade;
+
+    itens[id].num_pontos = qtd;
+    itens[id].ativo = true;
+
+    for(int i=0;i<qtd;i++){
+        itens[id].contorno[i] = pontos[i];
+    }
+
 	cout << endl;
 	cout << nome_item << " foi inserido(a) na Bolsa Devoradora, seu id sera: " << id << endl;
  	cout << endl;
@@ -253,6 +296,7 @@ void contar_propriedade(){
          << endl;
 }
 
+//----------------------------------------------
 
 treenodeptr menor(treenodeptr p){
     while(p->left != NULL)
@@ -298,17 +342,10 @@ void remover_nome(treenodeptr &p, string nome){
     }
 }
 
-void remover_item_indice(int pos){
-    
-    for(int i=pos;i<N-1;i++){
-        itens[i] = itens[i+1];
-    }
 
-    N--;
-}
 
-void remover_menos_raros(treenodeptr &root){
-
+void remover_menos_raros(treenodeptr &root)
+{
     int R;
 
     cout << "Valor minimo de raridade: ";
@@ -316,20 +353,16 @@ void remover_menos_raros(treenodeptr &root){
 
     int removidos = 0;
 
-    for(int i=0;i<N;){
+    for(int i=0;i<N;i++)
+    {
+        if(itens[i].ativo &&
+           itens[i].raridade < R)
+        {
+            remover_nome(root, itens[i].nome);
 
-        if(itens[i].raridade < R){
-
-            string nome_removido = itens[i].nome;
-
-            remover_nome(root, nome_removido);
-
-            remover_item_indice(i);
+            itens[i].ativo = false;
 
             removidos++;
-        }
-        else{
-            i++;
         }
     }
 
@@ -338,3 +371,53 @@ void remover_menos_raros(treenodeptr &root){
          << endl;
 }
 
+//------------------------------------------------
+
+double area_triangulo(Ponto a, Ponto b, Ponto c){
+    return (
+        a.x*b.y - a.y*b.x +
+        a.y*c.x - a.x*c.y +
+        b.x*c.y - b.y*c.x
+    ) / 2.0;
+}
+
+int orientacao(Ponto p1, Ponto p2, Ponto p3){
+
+    double area = area_triangulo(p1,p2,p3);
+
+    if(area == 0)
+        return 0;
+
+    if(area < 0)
+        return 1;
+
+    return 2;
+}
+
+bool poligono_convexo(Ponto p[], int n){
+
+    if(n < 3)
+        return false;
+
+    int primeira = 0;
+
+    for(int i=0;i<n;i++){
+
+        int o = orientacao(
+            p[i],
+            p[(i+1)%n],
+            p[(i+2)%n]
+        );
+
+        if(o != 0){
+
+            if(primeira == 0)
+                primeira = o;
+
+            else if(o != primeira)
+                return false;
+        }
+    }
+
+    return true;
+}
