@@ -26,7 +26,7 @@ int main(){
             cout << "Por favor, digite um numero!" << endl;
             cout << endl;
             cin.clear(); // Limpa o estado de erro do cin
-            cin.ignore(1000, '\n'); // Descarta a entrada inv?lida
+            cin.ignore(1000, '\n'); // Descarta a entrada invalida
             continue;
         }
     	
