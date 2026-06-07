@@ -6,12 +6,20 @@
 
 using namespace std;
 
+struct Ponto{
+    int x;
+    int y;
+};
+
 struct Item {
     int id;
     string nome;
     string dono;
     string propriedade_magica;
     int raridade;
+
+    Ponto contorno[100];
+    int num_pontos;
 };
 
 struct Aresta {
@@ -45,6 +53,8 @@ void listar_inordem(treenodeptr p);
 void listar_ordem_alfabetica(treenodeptr root);
 void listar_ordem_raridade();
 void contar_propriedade();
-void remover_menos_raros();
+void remover_menos_raros(treenodeptr &root);
+void remover_nome(treenodeptr &p, string nome);
+treenodeptr menor(treenodeptr p);
 
 #endif

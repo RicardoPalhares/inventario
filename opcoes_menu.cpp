@@ -192,15 +192,149 @@ void listar_ordem_alfabetica(treenodeptr root) {
     listar_inordem(root);
 }
 
+void trocar(Item &a, Item &b){
+    Item aux = a;
+    a = b;
+    b = aux;
+}
 
 void listar_ordem_raridade(){
-    cout << "Funcionalidade em construcao..." << endl;
+
+    if(N == 0){
+        cout << "Nenhum item cadastrado." << endl;
+        return;
+    }
+
+    Item aux[1000];
+
+    for(int i=0;i<N;i++)
+        aux[i] = itens[i];
+
+    for(int i=0;i<N-1;i++){
+        for(int j=i+1;j<N;j++){
+
+            if(aux[j].raridade > aux[i].raridade){
+                trocar(aux[i], aux[j]);
+            }
+
+        }
+    }
+
+    cout << "\nItens por raridade:\n";
+
+    for(int i=0;i<N;i++){
+        cout
+        << aux[i].nome
+        << " - raridade: "
+        << aux[i].raridade
+        << endl;
+    }
 }
 
 void contar_propriedade(){
-    cout << "Funcionalidade em construcao..." << endl;
+
+    string prop;
+
+    cout << "Digite a propriedade magica: ";
+    cin >> prop;
+
+    int contador = 0;
+
+    for(int i=0;i<N;i++){
+
+        if(itens[i].propriedade_magica == prop){
+            contador++;
+        }
+
+    }
+
+    cout << "Quantidade encontrada: "
+         << contador
+         << endl;
 }
 
-void remover_menos_raros(){
-    cout << "Funcionalidade em construcao..." << endl;
+
+treenodeptr menor(treenodeptr p){
+    while(p->left != NULL)
+        p = p->left;
+
+    return p;
 }
+
+void remover_nome(treenodeptr &p, string nome){
+    
+    if(p == NULL) return;
+
+    if(nome < p->info)
+        remover_nome(p->left, nome);
+
+    else if(nome > p->info)
+        remover_nome(p->right, nome);
+
+    else{
+
+        if(p->left == NULL){
+
+            treenodeptr aux = p;
+            p = p->right;
+            delete aux;
+        }
+
+        else if(p->right == NULL){
+
+            treenodeptr aux = p;
+            p = p->left;
+            delete aux;
+        }
+
+        else{
+
+            treenodeptr aux = menor(p->right);
+
+            p->info = aux->info;
+
+            remover_nome(p->right, aux->info);
+        }
+    }
+}
+
+void remover_item_indice(int pos){
+    
+    for(int i=pos;i<N-1;i++){
+        itens[i] = itens[i+1];
+    }
+
+    N--;
+}
+
+void remover_menos_raros(treenodeptr &root){
+
+    int R;
+
+    cout << "Valor minimo de raridade: ";
+    cin >> R;
+
+    int removidos = 0;
+
+    for(int i=0;i<N;){
+
+        if(itens[i].raridade < R){
+
+            string nome_removido = itens[i].nome;
+
+            remover_nome(root, nome_removido);
+
+            remover_item_indice(i);
+
+            removidos++;
+        }
+        else{
+            i++;
+        }
+    }
+
+    cout << removidos
+         << " itens removidos."
+         << endl;
+}
+

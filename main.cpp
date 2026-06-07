@@ -39,7 +39,7 @@ int main(){
             case 5: listar_ordem_alfabetica(root); break;
             case 6: listar_ordem_raridade(); break;
             case 7: contar_propriedade(); break;
-            case 8: remover_menos_raros(); break;
+            case 8: remover_menos_raros(root); break;
             case 9: return 0;
             default: cout << endl; 
 			cout << "Opcao invalida!" << endl; 
