@@ -1,0 +1,12 @@
+# Compilados
+*.exe
+*.o
+*.res
+
+# Falcon C++ (gerados no build)
+Makefile.mak
+AppManifest.dat
+AppResource.rc
+
+# Pacotes / backups
+*.zip
