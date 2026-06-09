@@ -58,7 +58,7 @@ double area_triangulo(Ponto a, Ponto b, Ponto c);
 int orientacao(Ponto p1, Ponto p2, Ponto p3);
 bool poligono_convexo(Ponto p[], int n);
 
-bool inserir_item_gui(treenodeptr &root, const string &nome, const string &dono, const string &prop, int raridade);
+int inserir_item_gui(treenodeptr &root, const string &nome, const string &dono, const string &prop, int raridade, Ponto pontos[], int qtd);
 bool cadastrar_similaridade_gui(int id1, int id2, int peso);
 string buscar_similares_gui(int C, int x, const string &j);
 bool verificar_existencia_gui(treenodeptr root, const string &nome);
@@ -66,5 +66,7 @@ string listar_ordem_alfabetica_gui(treenodeptr root);
 string listar_ordem_raridade_gui();
 string contar_propriedade_gui(const string &prop);
 string remover_menos_raros_gui(treenodeptr &root, int R);
+bool existe_itens_ativos();
+string detalhes_item_gui(int idItem);
 
 #endif

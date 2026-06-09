@@ -80,6 +80,43 @@ static int contar_itens_ativos() {
     return c;
 }
 
+bool existe_itens_ativos() {
+    return contar_itens_ativos() > 0;
+}
+
+string detalhes_item_gui(int idItem) {
+    if (idItem < 0 || idItem >= N || !itens[idItem].ativo)
+        return "Item invalido.";
+
+    string texto = "Nome: ";
+    texto += itens[idItem].nome;
+    texto += "\nDono: ";
+    texto += itens[idItem].dono;
+    texto += "\nPropriedade Magica: ";
+    texto += itens[idItem].propriedade_magica;
+    texto += "\nRaridade: ";
+    texto += numero_para_texto(itens[idItem].raridade);
+    texto += "\nID: ";
+    texto += numero_para_texto(itens[idItem].id);
+    texto += "\n\nCoordenadas do contorno:\n";
+
+    if (itens[idItem].num_pontos == 0) {
+        texto += "(nenhum ponto cadastrado)";
+    } else {
+        for (int i = 0; i < itens[idItem].num_pontos; i++) {
+            texto += "Ponto ";
+            texto += numero_para_texto(i + 1);
+            texto += ": (";
+            texto += numero_para_texto(itens[idItem].contorno[i].x);
+            texto += ", ";
+            texto += numero_para_texto(itens[idItem].contorno[i].y);
+            texto += ")\n";
+        }
+    }
+
+    return texto;
+}
+
 static void listar_inordem_detalhes(treenodeptr p, string &s, bool usado[]) {
     if (p != NULL) {
         listar_inordem_detalhes(p->left, s, usado);
@@ -106,21 +143,65 @@ static void listar_inordem_detalhes(treenodeptr p, string &s, bool usado[]) {
     }
 }
 
-bool inserir_item_gui(treenodeptr &root, const string &nome, const string &dono, const string &prop, int raridade) {
-    if (id >= 1000)
-        return false;
+static string nome_base(const string &nome) {
+    if (nome.size() > 3 && nome[0] == '(') {
+        size_t fim = nome.find(") ");
+        if (fim != string::npos)
+            return nome.substr(fim + 2);
+    }
+    return nome;
+}
 
-    tInsert(root, nome);
+static int contar_itens_mesmo_nome(const string &nomeBase) {
+    int c = 0;
+    for (int i = 0; i < N; i++) {
+        if (itens[i].ativo && nome_base(itens[i].nome) == nomeBase)
+            c++;
+    }
+    return c;
+}
+
+static string nome_com_duplicata(const string &nome) {
+    string base = nome_base(nome);
+    int iguais = contar_itens_mesmo_nome(base);
+
+    if (iguais == 0)
+        return base;
+
+    string resultado = "(";
+    resultado += numero_para_texto(iguais + 1);
+    resultado += ") ";
+    resultado += base;
+    return resultado;
+}
+
+int inserir_item_gui(treenodeptr &root, const string &nome, const string &dono, const string &prop, int raridade, Ponto pontos[], int qtd) {
+    if (id >= 1000)
+        return 0;
+
+    if (qtd < 3)
+        return -1;
+
+    if (!poligono_convexo(pontos, qtd))
+        return -2;
+
+    string nomeFinal = nome_com_duplicata(nome);
+
+    tInsert(root, nomeFinal);
     itens[id].id = id;
-    itens[id].nome = nome;
+    itens[id].nome = nomeFinal;
     itens[id].dono = dono;
     itens[id].propriedade_magica = prop;
     itens[id].raridade = raridade;
-    itens[id].num_pontos = 0;
+    itens[id].num_pontos = qtd;
     itens[id].ativo = true;
+
+    for (int i = 0; i < qtd; i++)
+        itens[id].contorno[i] = pontos[i];
+
     id++;
     N++;
-    return true;
+    return 1;
 }
 
 bool cadastrar_similaridade_gui(int id1, int id2, int peso) {
@@ -150,7 +231,7 @@ string buscar_similares_gui(int C, int x, const string &j) {
     for (it = grafo[C].begin(); it != grafo[C].end(); it++) {
         int id_similar = it->id2;
 
-        if (it->peso > x && itens[id_similar].ativo) {
+        if (it->peso >= x && itens[id_similar].ativo) {
             if (itens[id_similar].dono != j) {
                 if (encontrou)
                     texto += "\n";
