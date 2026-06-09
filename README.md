@@ -1,5 +1,6 @@
 # Inventario
 
+Se caso queira testar pelo opcoes_menu sem layout
 ## Compilar e rodar
 
 No terminal
