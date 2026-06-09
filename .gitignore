@@ -11,4 +11,5 @@ AppResource.rc
 
 # Pacotes / backups
 *.zip
+publicar.bat
 publicar.bat.bak
