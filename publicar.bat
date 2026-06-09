@@ -58,15 +58,19 @@ for /f "tokens=1-3 delims=/ " %%a in ("%date%") do set DATA=%%c-%%b-%%a
 for /f "tokens=1-2 delims=: " %%a in ("%time%") do set HORA=%%a:%%b
 set HORA=%HORA: =0%
 
+set CURSOR_AGENT=
+set CURSOR_TRACE_ID=
+
 if exist ".git\MERGE_HEAD" (
     echo Finalizando merge...
-    git commit --no-edit
-    if errorlevel 1 (
-        git commit -m "Merge com remoto %DATA% %HORA%"
-    )
+    echo Merge com remoto %DATA% %HORA%> "%TEMP%\inv_commit.txt"
+    git commit -F "%TEMP%\inv_commit.txt"
+    del "%TEMP%\inv_commit.txt" 2>nul
 ) else (
     echo Criando commit...
-    git commit -m "Atualizacao %DATA% %HORA%"
+    echo Atualizacao %DATA% %HORA%> "%TEMP%\inv_commit.txt"
+    git commit -F "%TEMP%\inv_commit.txt"
+    del "%TEMP%\inv_commit.txt" 2>nul
 )
 
 if errorlevel 1 (
@@ -108,7 +112,7 @@ if errorlevel 1 (
     echo [ERRO] Falha no push.
     echo - Feche programas que estejam usando arquivos do projeto
     echo - Confirme login no GitHub ^(Git Credential Manager ou gh auth login^)
-    echo - Se aparecer conflito, resolva no VS Code/Cursor e rode este .bat de novo
+    echo - Se aparecer conflito, resolva no editor e rode este .bat de novo
     goto fim
 )
 

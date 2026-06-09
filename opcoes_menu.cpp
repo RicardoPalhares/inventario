@@ -124,7 +124,7 @@ bool inserir_item_gui(treenodeptr &root, const string &nome, const string &dono,
 }
 
 bool cadastrar_similaridade_gui(int id1, int id2, int peso) {
-    if ((id1 >= 0 && id1 < N) && (id2 >= 0 && id2 < N)) {
+    if ((id1 >= 0 && id1 < N) && (id2 >= 0 && id2 < N) && itens[id1].ativo && itens[id2].ativo) {
         Aresta a1, a2;
         a1.id1 = id1;
         a1.id2 = id2;
@@ -143,8 +143,8 @@ string buscar_similares_gui(int C, int x, const string &j) {
     string texto = "";
     bool encontrou = false;
 
-    if (C < 0 || C >= N)
-        return "Id de item base invalido.";
+    if (C < 0 || C >= N || !itens[C].ativo)
+        return "Item base invalido ou removido.";
 
     list<Aresta>::iterator it;
     for (it = grafo[C].begin(); it != grafo[C].end(); it++) {
@@ -333,57 +333,65 @@ void trocar(Item &a, Item &b){
     b = aux;
 }
 
-void listar_ordem_raridade(){
+string listar_ordem_raridade_gui() {
+    int ativos = contar_itens_ativos();
 
-    if(N == 0){
-        cout << "Nenhum item cadastrado." << endl;
-        return;
-    }
+    if (N == 0 || ativos == 0)
+        return "Nenhum item cadastrado.";
 
     Item aux[1000];
+    int qtd = 0;
 
-    for(int i=0;i<N;i++)
-        aux[i] = itens[i];
+    for (int i = 0; i < N; i++) {
+        if (itens[i].ativo) {
+            aux[qtd] = itens[i];
+            qtd++;
+        }
+    }
 
-    for(int i=0;i<N-1;i++){
-        for(int j=i+1;j<N;j++){
-            if(aux[j].raridade > aux[i].raridade){
+    for (int i = 0; i < qtd - 1; i++) {
+        for (int j = i + 1; j < qtd; j++) {
+            if (aux[j].raridade > aux[i].raridade)
                 trocar(aux[i], aux[j]);
-            }
         }
     }
 
-    cout << "\nItens por raridade:\n";
+    string texto = "Itens por raridade:\n\n";
 
-    for(int i=0;i<N;i++){
-        if(aux[i].ativo){
-            cout
-            << aux[i].nome
-            << " - raridade: "
-            << aux[i].raridade
-            << endl;
-        }
+    for (int i = 0; i < qtd; i++) {
+        texto += aux[i].nome;
+        texto += " - raridade: ";
+        texto += numero_para_texto(aux[i].raridade);
+        texto += "\n";
     }
+
+    return texto;
+}
+
+string contar_propriedade_gui(const string &prop) {
+    int contador = 0;
+
+    for (int i = 0; i < N; i++) {
+        if (itens[i].ativo && itens[i].propriedade_magica == prop)
+            contador++;
+    }
+
+    string texto = "Quantidade encontrada: ";
+    texto += numero_para_texto(contador);
+    return texto;
+}
+
+void listar_ordem_raridade(){
+    cout << listar_ordem_raridade_gui() << endl;
 }
 
 void contar_propriedade(){
-
     string prop;
 
     cout << "Digite a propriedade magica: ";
     cin >> prop;
 
-    int contador = 0;
-
-    for(int i=0;i<N;i++){
-        if(itens[i].ativo && itens[i].propriedade_magica == prop){
-            contador++;
-        }
-    }
-
-    cout << "Quantidade encontrada: "
-         << contador
-         << endl;
+    cout << contar_propriedade_gui(prop) << endl;
 }
 
 treenodeptr menor(treenodeptr p){
@@ -419,6 +427,22 @@ void remover_nome(treenodeptr &p, string nome){
     }
 }
 
+string remover_menos_raros_gui(treenodeptr &root, int R) {
+    int removidos = 0;
+
+    for (int i = 0; i < N; i++) {
+        if (itens[i].ativo && itens[i].raridade < R) {
+            remover_nome(root, itens[i].nome);
+            itens[i].ativo = false;
+            removidos++;
+        }
+    }
+
+    string texto = numero_para_texto(removidos);
+    texto += " itens removidos.";
+    return texto;
+}
+
 void remover_menos_raros(treenodeptr &root)
 {
     int R;
@@ -426,22 +450,7 @@ void remover_menos_raros(treenodeptr &root)
     cout << "Valor minimo de raridade: ";
     cin >> R;
 
-    int removidos = 0;
-
-    for(int i=0;i<N;i++)
-    {
-        if(itens[i].ativo &&
-           itens[i].raridade < R)
-        {
-            remover_nome(root, itens[i].nome);
-            itens[i].ativo = false;
-            removidos++;
-        }
-    }
-
-    cout << removidos
-         << " itens removidos."
-         << endl;
+    cout << remover_menos_raros_gui(root, R) << endl;
 }
 
 double area_triangulo(Ponto a, Ponto b, Ponto c){

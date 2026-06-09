@@ -63,5 +63,8 @@ bool cadastrar_similaridade_gui(int id1, int id2, int peso);
 string buscar_similares_gui(int C, int x, const string &j);
 bool verificar_existencia_gui(treenodeptr root, const string &nome);
 string listar_ordem_alfabetica_gui(treenodeptr root);
+string listar_ordem_raridade_gui();
+string contar_propriedade_gui(const string &prop);
+string remover_menos_raros_gui(treenodeptr &root, int R);
 
 #endif

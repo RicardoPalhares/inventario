@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Layout>
 	<Files>
-		<File Name="main.cpp" Top="Yes" Tabpos="1" TopLine="877">
-			<Cursor Line="116" Column="18"/>
-			<Selection Line="116" Column="26"/>
+		<File Name="main.cpp" Top="Yes" Tabpos="1" TopLine="1190">
+			<Cursor Line="1256" Column="2"/>
 		</File>
-		<File Name="opcoes_menu.cpp" Top="No" Tabpos="2" TopLine="133">
+		<File Name="opcoes_menu.cpp" Top="No" Tabpos="2" TopLine="1">
 			<Cursor Line="1" Column="1"/>
 		</File>
 		<File Name="opcoes_menu.h" Top="No" Tabpos="3" TopLine="1">
