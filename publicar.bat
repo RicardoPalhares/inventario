@@ -32,8 +32,16 @@ if errorlevel 1 (
 )
 
 REM Tira arquivos ignorados do controle de versao (se ja estavam adicionados)
-git rm --cached -f inventario.exe inventario_test.exe 2>nul
+git rm --cached -f inventario.exe inventario_test.exe main 2>nul
 for %%f in (*.zip) do git rm --cached -f "%%f" 2>nul
+
+git diff --name-only --diff-filter=U 2>nul | findstr /r "." >nul
+if not errorlevel 1 (
+    echo.
+    echo [ERRO] Ha conflitos de merge pendentes.
+    echo Resolva os arquivos marcados e rode este .bat de novo.
+    goto fim
+)
 
 git add -A
 
@@ -50,9 +58,23 @@ for /f "tokens=1-3 delims=/ " %%a in ("%date%") do set DATA=%%c-%%b-%%a
 for /f "tokens=1-2 delims=: " %%a in ("%time%") do set HORA=%%a:%%b
 set HORA=%HORA: =0%
 
-echo Criando commit...
-git commit -m "Atualizacao %DATA% %HORA%"
+if exist ".git\MERGE_HEAD" (
+    echo Finalizando merge...
+    git commit --no-edit
+    if errorlevel 1 (
+        git commit -m "Merge com remoto %DATA% %HORA%"
+    )
+) else (
+    echo Criando commit...
+    git commit -m "Atualizacao %DATA% %HORA%"
+)
+
 if errorlevel 1 (
+    git diff --cached --quiet
+    if not errorlevel 1 (
+        echo Nada novo para publicar.
+        goto fim
+    )
     echo [ERRO] Falha ao criar commit.
     echo Verifique se o Git ja tem seu nome e e-mail configurados.
     goto fim
@@ -65,10 +87,18 @@ echo Sincronizando com o remoto...
 git fetch origin 2>nul
 git rev-parse origin/main >nul 2>&1
 if not errorlevel 1 (
-    git pull origin main --allow-unrelated-histories --no-edit 2>nul
+    git pull origin main --no-edit 2>nul
     if errorlevel 1 (
         git pull origin main --rebase --autostash 2>nul
     )
+)
+
+git diff --name-only --diff-filter=U 2>nul | findstr /r "." >nul
+if not errorlevel 1 (
+    echo.
+    echo [ERRO] Conflito ao sincronizar com o remoto.
+    echo Resolva no editor e rode este .bat de novo.
+    goto fim
 )
 
 echo Enviando para https://github.com/RicardoPalhares/inventario ...

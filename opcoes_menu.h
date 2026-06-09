@@ -6,12 +6,20 @@
 
 using namespace std;
 
+struct Ponto {
+    int x;
+    int y;
+};
+
 struct Item {
     int id;
     string nome;
     string dono;
     string propriedade_magica;
     int raridade;
+    Ponto contorno[100];
+    int num_pontos;
+    bool ativo;
 };
 
 struct Aresta {
@@ -43,9 +51,13 @@ void listar_inordem(treenodeptr p);
 void listar_ordem_alfabetica(treenodeptr root);
 void listar_ordem_raridade();
 void contar_propriedade();
-void remover_menos_raros();
+void remover_menos_raros(treenodeptr &root);
+void remover_nome(treenodeptr &p, string nome);
+treenodeptr menor(treenodeptr p);
+double area_triangulo(Ponto a, Ponto b, Ponto c);
+int orientacao(Ponto p1, Ponto p2, Ponto p3);
+bool poligono_convexo(Ponto p[], int n);
 
-/* Versoes para a GUI (WinMain) */
 bool inserir_item_gui(treenodeptr &root, const string &nome, const string &dono, const string &prop, int raridade);
 bool cadastrar_similaridade_gui(int id1, int id2, int peso);
 string buscar_similares_gui(int C, int x, const string &j);

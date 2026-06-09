@@ -4,6 +4,7 @@
 #include "opcoes_menu.h"
 
 using namespace std;
+typedef treenode* treenodeptr;
 
 void mostrar_opcoes(){
         cout << "1. Inserir item" << endl;
@@ -70,12 +71,21 @@ static string numero_para_texto(int n) {
     return s;
 }
 
+static int contar_itens_ativos() {
+    int c = 0;
+    for (int i = 0; i < N; i++) {
+        if (itens[i].ativo)
+            c++;
+    }
+    return c;
+}
+
 static void listar_inordem_detalhes(treenodeptr p, string &s, bool usado[]) {
     if (p != NULL) {
         listar_inordem_detalhes(p->left, s, usado);
 
         for (int i = 0; i < N; i++) {
-            if (!usado[i] && itens[i].nome == p->info) {
+            if (!usado[i] && itens[i].ativo && itens[i].nome == p->info) {
                 usado[i] = true;
                 s += itens[i].nome;
                 s += "\n";
@@ -106,6 +116,8 @@ bool inserir_item_gui(treenodeptr &root, const string &nome, const string &dono,
     itens[id].dono = dono;
     itens[id].propriedade_magica = prop;
     itens[id].raridade = raridade;
+    itens[id].num_pontos = 0;
+    itens[id].ativo = true;
     id++;
     N++;
     return true;
@@ -138,7 +150,7 @@ string buscar_similares_gui(int C, int x, const string &j) {
     for (it = grafo[C].begin(); it != grafo[C].end(); it++) {
         int id_similar = it->id2;
 
-        if (it->peso > x) {
+        if (it->peso > x && itens[id_similar].ativo) {
             if (itens[id_similar].dono != j) {
                 if (encontrou)
                     texto += "\n";
@@ -159,11 +171,13 @@ bool verificar_existencia_gui(treenodeptr root, const string &nome) {
 }
 
 string listar_ordem_alfabetica_gui(treenodeptr root) {
-    if (root == NULL || N == 0)
+    int ativos = contar_itens_ativos();
+
+    if (root == NULL || ativos == 0)
         return "Nenhum item cadastrado.";
 
     string texto = "Itens cadastrados: ";
-    texto += numero_para_texto(N);
+    texto += numero_para_texto(ativos);
     texto += "\n\nItens em ordem alfabetica:\n\n";
 
     bool usado[1000];
@@ -208,10 +222,50 @@ void inserir_item(treenodeptr &root){
         else break;
     }
 
-    inserir_item_gui(root, nome_item, dono, propriedade_magica, raridade);
+    int qtd;
+
+    cout << "Quantidade de pontos do contorno: ";
+    cin >> qtd;
+
+    while(qtd < 3){
+        cout << "Poligonos precisam de pelo menos 3 pontos: ";
+        cin >> qtd;
+    }
+
+    Ponto pontos[100];
+
+    for(int i=0;i<qtd;i++){
+        cout << "Ponto " << i+1 << ": ";
+        cin >> pontos[i].x >> pontos[i].y;
+    }
+
+    if(!poligono_convexo(pontos, qtd)){
+        cout << endl;
+        cout << "Item rejeitado." << endl;
+        cout << "O contorno informado nao forma um poligono convexo." << endl;
+        cout << endl;
+        return;
+    }
+
+    tInsert(root, nome_item);
+
+    itens[id].id = id;
+    itens[id].nome = nome_item;
+    itens[id].dono = dono;
+    itens[id].propriedade_magica = propriedade_magica;
+    itens[id].raridade = raridade;
+    itens[id].num_pontos = qtd;
+    itens[id].ativo = true;
+
+    for(int i=0;i<qtd;i++){
+        itens[id].contorno[i] = pontos[i];
+    }
+
     cout << endl;
-    cout << nome_item << " foi inserido(a) na Bolsa Devoradora, seu id sera: " << (id - 1) << endl;
+    cout << nome_item << " foi inserido(a) na Bolsa Devoradora, seu id sera: " << id << endl;
     cout << endl;
+    id++;
+    N++;
 }
 
 void cadastrar_similaridade(){
@@ -228,7 +282,6 @@ void cadastrar_similaridade(){
         if(op == "y" || op == "Y"){
             cout << "Insira o valor da similaridade entre eles: " << endl;
             cin >> peso;
-
             cadastrar_similaridade_gui(id1, id2, peso);
         }
         else{
@@ -274,14 +327,166 @@ void listar_ordem_alfabetica(treenodeptr root) {
     cout << listar_ordem_alfabetica_gui(root) << endl;
 }
 
+void trocar(Item &a, Item &b){
+    Item aux = a;
+    a = b;
+    b = aux;
+}
+
 void listar_ordem_raridade(){
-    cout << "Funcionalidade em construcao..." << endl;
+
+    if(N == 0){
+        cout << "Nenhum item cadastrado." << endl;
+        return;
+    }
+
+    Item aux[1000];
+
+    for(int i=0;i<N;i++)
+        aux[i] = itens[i];
+
+    for(int i=0;i<N-1;i++){
+        for(int j=i+1;j<N;j++){
+            if(aux[j].raridade > aux[i].raridade){
+                trocar(aux[i], aux[j]);
+            }
+        }
+    }
+
+    cout << "\nItens por raridade:\n";
+
+    for(int i=0;i<N;i++){
+        if(aux[i].ativo){
+            cout
+            << aux[i].nome
+            << " - raridade: "
+            << aux[i].raridade
+            << endl;
+        }
+    }
 }
 
 void contar_propriedade(){
-    cout << "Funcionalidade em construcao..." << endl;
+
+    string prop;
+
+    cout << "Digite a propriedade magica: ";
+    cin >> prop;
+
+    int contador = 0;
+
+    for(int i=0;i<N;i++){
+        if(itens[i].ativo && itens[i].propriedade_magica == prop){
+            contador++;
+        }
+    }
+
+    cout << "Quantidade encontrada: "
+         << contador
+         << endl;
 }
 
-void remover_menos_raros(){
-    cout << "Funcionalidade em construcao..." << endl;
+treenodeptr menor(treenodeptr p){
+    while(p->left != NULL)
+        p = p->left;
+    return p;
+}
+
+void remover_nome(treenodeptr &p, string nome){
+
+    if(p == NULL) return;
+
+    if(nome < p->info)
+        remover_nome(p->left, nome);
+    else if(nome > p->info)
+        remover_nome(p->right, nome);
+    else{
+        if(p->left == NULL){
+            treenodeptr aux = p;
+            p = p->right;
+            delete aux;
+        }
+        else if(p->right == NULL){
+            treenodeptr aux = p;
+            p = p->left;
+            delete aux;
+        }
+        else{
+            treenodeptr aux = menor(p->right);
+            p->info = aux->info;
+            remover_nome(p->right, aux->info);
+        }
+    }
+}
+
+void remover_menos_raros(treenodeptr &root)
+{
+    int R;
+
+    cout << "Valor minimo de raridade: ";
+    cin >> R;
+
+    int removidos = 0;
+
+    for(int i=0;i<N;i++)
+    {
+        if(itens[i].ativo &&
+           itens[i].raridade < R)
+        {
+            remover_nome(root, itens[i].nome);
+            itens[i].ativo = false;
+            removidos++;
+        }
+    }
+
+    cout << removidos
+         << " itens removidos."
+         << endl;
+}
+
+double area_triangulo(Ponto a, Ponto b, Ponto c){
+    return (
+        a.x*b.y - a.y*b.x +
+        a.y*c.x - a.x*c.y +
+        b.x*c.y - b.y*c.x
+    ) / 2.0;
+}
+
+int orientacao(Ponto p1, Ponto p2, Ponto p3){
+
+    double area = area_triangulo(p1,p2,p3);
+
+    if(area == 0)
+        return 0;
+
+    if(area < 0)
+        return 1;
+
+    return 2;
+}
+
+bool poligono_convexo(Ponto p[], int n){
+
+    if(n < 3)
+        return false;
+
+    int primeira = 0;
+
+    for(int i=0;i<n;i++){
+
+        int o = orientacao(
+            p[i],
+            p[(i+1)%n],
+            p[(i+2)%n]
+        );
+
+        if(o != 0){
+            if(primeira == 0)
+                primeira = o;
+            else if(o != primeira)
+                return false;
+        }
+    }
+
+    return true;
 }
