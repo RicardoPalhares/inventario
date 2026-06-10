@@ -1,30 +1,67 @@
+/*
+ * main.cpp - Interface grafica do inventario (Windows API)
+ *
+ * Este arquivo cuida das janelas, botoes e campos de texto.
+ * A logica dos itens (arvore, grafo, validacoes) fica em opcoes_menu.cpp.
+ */
+
+/* ====================== */
+/* BIBLIOTECAS            */
+/* ====================== */
+/* windows.h  - API do Windows: cria janelas, botoes, caixas de texto, mensagens */
+/* commdlg.h  - Dialogo padrao para escolher arquivo (.txt) no botao "+" */
+/* stdio.h    - Leitura de arquivo com fopen/fread (importacao em lote) */
+/* string     - Texto dinamico (std::string) para montar linhas e mensagens */
+/* opcoes_menu.h - Declaracoes das funcoes e estruturas do inventario (Item, Ponto, arvore) */
+
 #include <windows.h>
-#include <commdlg.h> // API do 
+#include <commdlg.h>
 #include <stdio.h>
 #include <string>
 #include "opcoes_menu.h"
 
 using namespace std;
 
-LRESULT CALLBACK MenuProc(HWND,UINT,WPARAM,LPARAM);
-LRESULT CALLBACK InserirProc(HWND,UINT,WPARAM,LPARAM);
-LRESULT CALLBACK SimilaridadeProc(HWND,UINT,WPARAM,LPARAM);
-LRESULT CALLBACK BuscarProc(HWND,UINT,WPARAM,LPARAM);
-LRESULT CALLBACK VerificarProc(HWND,UINT,WPARAM,LPARAM);
-LRESULT CALLBACK ContarProc(HWND,UINT,WPARAM,LPARAM);
-LRESULT CALLBACK RemoverProc(HWND,UINT,WPARAM,LPARAM);
-LRESULT CALLBACK ListarProc(HWND,UINT,WPARAM,LPARAM);
+/* ====================== */
+/* PROTOTIPOS DAS JANELAS */
+/* ====================== */
+/* Cada janela do programa tem uma funcao "Proc" que recebe os eventos
+   (clique, criacao, fechamento). O Windows chama essas funcoes automaticamente. */
 
-#define ESTILO_JANELA (WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_VISIBLE)
-#define ID_LISTA_ITENS 902
-#define ID_BTN_DETALHES 903
-#define ID_BTN_FECHAR_LISTA 904
-#define ID_COMBO_ORDEM 905
+LRESULT CALLBACK MenuProc(HWND,UINT,WPARAM,LPARAM);         /* tela inicial com os botoes do menu */
+LRESULT CALLBACK InserirProc(HWND,UINT,WPARAM,LPARAM);      /* formulario de novo item */
+LRESULT CALLBACK SimilaridadeProc(HWND,UINT,WPARAM,LPARAM); /* ligar dois itens com um peso */
+LRESULT CALLBACK BuscarProc(HWND,UINT,WPARAM,LPARAM);     /* buscar itens parecidos */
+LRESULT CALLBACK VerificarProc(HWND,UINT,WPARAM,LPARAM);  /* checar se um nome existe */
+LRESULT CALLBACK ContarProc(HWND,UINT,WPARAM,LPARAM);       /* contar itens por propriedade */
+LRESULT CALLBACK RemoverProc(HWND,UINT,WPARAM,LPARAM);      /* remover itens pouco raros */
+LRESULT CALLBACK ListarProc(HWND,UINT,WPARAM,LPARAM);       /* listar itens com ordenacao */
 
+/* ====================== */
+/* CONSTANTES DA INTERFACE*/
+/* ====================== */
+
+#define ESTILO_JANELA (WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_VISIBLE) /* janela simples, sem redimensionar */
+#define ID_LISTA_ITENS 902        /* identificador da listbox na tela de listar */
+#define ID_BTN_DETALHES 903       /* botao "Ver detalhes" */
+#define ID_BTN_FECHAR_LISTA 904   /* botao "Fechar" da listagem */
+#define ID_COMBO_ORDEM 905        /* combo "Alfabetico" / "Raridade" */
+
+/* ====================== */
+/* VARIAVEIS GLOBAIS      */
+/* ====================== */
+
+/* Estrutura principal do inventario: arvore binaria de busca pelos nomes */
 treenodeptr root = NULL;
+
+/* Referencia da janela principal (menu) para restaurar foco ao fechar sub-janelas */
 HWND janelaPrincipal = NULL;
+
+/* Controle da listagem de itens (compartilhado pela janela Listar) */
 HWND listaItens;
 
+/* Handles dos campos de texto/combo de cada tela.
+   HWND = "ponteiro" para um controle visual criado com CreateWindow. */
 HWND campoNome;
 HWND campoDono;
 HWND campoProp;
@@ -43,9 +80,15 @@ HWND campoPontoX;
 HWND campoPontoY;
 HWND labelPontos;
 
+/* Pontos do contorno enquanto o usuario vai clicando em "+" na tela Inserir */
 Ponto pontosInserir[100];
 int pontosInseridos = 0;
 
+/* ====================== */
+/* FUNCOES AUXILIARES     */
+/* ====================== */
+
+/* Verifica se o texto do campo tem apenas espacos ou esta vazio */
 bool campoVazio(const char* s)
 {
     for(int i=0; s[i]; i++)
@@ -56,6 +99,7 @@ bool campoVazio(const char* s)
     return true;
 }
 
+/* Converte o indice selecionado no combo para o id real do item no vetor itens[] */
 int id_item_ativo_pelo_combo(int sel)
 {
     if(sel < 0)
@@ -74,6 +118,7 @@ int id_item_ativo_pelo_combo(int sel)
     return -1;
 }
 
+/* Le uma linha "X Y" e separa as duas coordenadas (usado na importacao de arquivo) */
 bool ler_ponto(const string &linha, int &x, int &y)
 {
     size_t pos = linha.find(' ');
@@ -85,6 +130,7 @@ bool ler_ponto(const string &linha, int &x, int &y)
     return true;
 }
 
+/* Le varias linhas "x y" de um bloco de texto e monta o array de pontos do contorno */
 bool ler_contorno_texto(const char* texto, int qtd, Ponto pontos[])
 {
     string s = texto;
@@ -117,6 +163,7 @@ bool ler_contorno_texto(const char* texto, int qtd, Ponto pontos[])
     return lidos == qtd;
 }
 
+/* Atualiza o texto "Pontos cadastrados: N" na tela de inserir item */
 void atualizar_label_pontos()
 {
     char buf[50];
@@ -124,6 +171,7 @@ void atualizar_label_pontos()
     SetWindowText(labelPontos,buf);
 }
 
+/* Descobre qual janela abriu a janela atual (para devolver o foco ao menu) */
 HWND obter_janela_pai(HWND hwnd)
 {
     HWND pai = GetWindow(hwnd, GW_OWNER);
@@ -134,6 +182,7 @@ HWND obter_janela_pai(HWND hwnd)
     return pai;
 }
 
+/* Reativa e traz para frente a janela que estava por tras do dialogo */
 void restaurar_janela_pai(HWND hwnd)
 {
     HWND pai = obter_janela_pai(hwnd);
@@ -154,12 +203,14 @@ void restaurar_janela_pai(HWND hwnd)
     SetForegroundWindow(pai);
 }
 
+/* Fecha a sub-janela e restaura o menu principal */
 void fechar_janela(HWND hwnd)
 {
     restaurar_janela_pai(hwnd);
     DestroyWindow(hwnd);
 }
 
+/* Percorre a arvore em ordem e adiciona os nomes na listbox (ordenacao alfabetica) */
 void preencher_lista_alfabetica(HWND lista, treenodeptr p, bool usado[])
 {
     if(p == NULL)
@@ -181,6 +232,7 @@ void preencher_lista_alfabetica(HWND lista, treenodeptr p, bool usado[])
     preencher_lista_alfabetica(lista, p->right, usado);
 }
 
+/* Ordena os itens ativos por raridade (maior primeiro) e preenche a listbox */
 void preencher_lista_raridade(HWND lista)
 {
     Item aux[1000];
@@ -216,6 +268,7 @@ void preencher_lista_raridade(HWND lista)
     }
 }
 
+/* Limpa a listbox e recarrega conforme o modo: 0 = alfabetico, 1 = raridade */
 void atualizar_lista_itens(HWND lista, int modo)
 {
     SendMessage(lista, LB_RESETCONTENT, 0, 0);
@@ -234,6 +287,13 @@ void atualizar_lista_itens(HWND lista, int modo)
     }
 }
 
+/* ====================== */
+/* IMPORTACAO DE ARQUIVO  */
+/* ====================== */
+/* O botao "+" do menu abre um .txt no formato do EXEMPLE.txt.
+   Primeiro le os itens; depois, se existir secao "Similaridade", le os pares. */
+
+/* Ignora linhas de titulo/explicacao do arquivo de exemplo */
 bool linha_cabecalho(const string& linha)
 {
     return linha.find("Inserindo") != string::npos
@@ -244,6 +304,7 @@ bool linha_cabecalho(const string& linha)
         || linha.find("mesmo arquivo") != string::npos;
 }
 
+/* Verifica se a linha contem somente digitos (peso da similaridade) */
 bool linha_apenas_numero(const string& linha)
 {
     if(linha.empty())
@@ -258,6 +319,7 @@ bool linha_apenas_numero(const string& linha)
     return true;
 }
 
+/* Le uma linha "id1 id2" da secao de similaridades */
 bool ler_par_ids(const string& linha, int& id1, int& id2)
 {
     size_t pos = linha.find(' ');
@@ -287,6 +349,7 @@ bool ler_par_ids(const string& linha, int& id1, int& id2)
     return true;
 }
 
+/* Carrega o arquivo inteiro para uma string em memoria */
 bool ler_arquivo_txt(const char* caminho, string& conteudo)
 {
     FILE* arquivo = fopen(caminho, "rb");
@@ -318,6 +381,7 @@ bool ler_arquivo_txt(const char* caminho, string& conteudo)
     return true;
 }
 
+/* Abre a janela "Abrir arquivo" do Windows filtrando apenas .txt */
 bool escolher_arquivo_txt(HWND hwnd, char* caminho, int tamMax)
 {
     char arquivo[MAX_PATH] = "";
@@ -340,6 +404,7 @@ bool escolher_arquivo_txt(HWND hwnd, char* caminho, int tamMax)
     return true;
 }
 
+/* Le blocos de 4 linhas (nome, dono, prop, raridade) + qtd pontos + coordenadas */
 void importar_itens_de_texto(const string& texto, int& importados, int& rejeitados)
 {
     string conteudo = texto;
@@ -415,6 +480,7 @@ void importar_itens_de_texto(const string& texto, int& importados, int& rejeitad
     }
 }
 
+/* Le pares id1 id2 seguidos de uma linha com o peso da aresta no grafo */
 void importar_similaridades_de_texto(const string& texto, int& importadas)
 {
     string conteudo = texto;
@@ -465,6 +531,7 @@ void importar_similaridades_de_texto(const string& texto, int& importadas)
     }
 }
 
+/* Fluxo completo do botao "+": escolhe arquivo, divide em itens/similaridades e mostra resumo */
 void importar_de_arquivo(HWND hwnd)
 {
     char caminho[MAX_PATH];
@@ -498,6 +565,7 @@ void importar_de_arquivo(HWND hwnd)
     MessageBox(hwnd, msg, "Importacao", MB_OK);
 }
 
+/* Pega o item selecionado na listbox e exibe nome, dono, raridade, contorno etc. */
 void mostrar_detalhes_lista(HWND hwnd, HWND lista)
 {
     int sel = SendMessage(lista, LB_GETCURSEL, 0, 0);
@@ -515,13 +583,17 @@ void mostrar_detalhes_lista(HWND hwnd, HWND lista)
 }
 
 /* ====================== */
-/* WINMAIN                */
+/* WINMAIN - PONTO DE     */
+/* ENTRADA DO PROGRAMA    */
 /* ====================== */
+/* WinMain substitui o main() em programas com interface Windows.
+   Aqui registramos cada tipo de janela e entramos no loop de mensagens. */
 
 int WINAPI WinMain(HINSTANCE hInst,HINSTANCE,LPSTR,int)
 {
-    WNDCLASSEX wc;
+    WNDCLASSEX wc; /* estrutura que descreve uma "classe" de janela reutilizavel */
 
+    /* Configuracao padrao compartilhada por todas as janelas */
     wc.cbSize=sizeof(WNDCLASSEX);
     wc.style=0;
     wc.cbClsExtra=0;
@@ -534,10 +606,10 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE,LPSTR,int)
     wc.lpszMenuName=NULL;
 
 
+    /* Registra cada tela ligando o nome da classe a sua funcao Proc */
     wc.lpfnWndProc=MenuProc;
     wc.lpszClassName="MenuPrincipal";
     RegisterClassEx(&wc);
-
 
     wc.lpfnWndProc=InserirProc;
     wc.lpszClassName="JanelaInserir";
@@ -567,6 +639,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE,LPSTR,int)
 	wc.lpszClassName="JanelaListar";
 	RegisterClassEx(&wc);
 
+    /* Cria a janela principal e guarda o handle em janelaPrincipal */
     janelaPrincipal = CreateWindow(
         "MenuPrincipal",
         "Bolsa Devoradora",
@@ -575,7 +648,7 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE,LPSTR,int)
         NULL,NULL,hInst,NULL
     );
 
-
+    /* Loop infinito: o Windows envia mensagens (cliques, teclas, fechar) ate WM_QUIT */
     MSG msg;
 
     while(GetMessage(&msg,NULL,0,0))
@@ -592,13 +665,17 @@ int WINAPI WinMain(HINSTANCE hInst,HINSTANCE,LPSTR,int)
 /* ====================== */
 /* MENU PRINCIPAL         */
 /* ====================== */
+/* Tela inicial com os botoes de cada operacao do inventario.
+   WM_CREATE  = monta os botoes na abertura
+   WM_COMMAND = reage ao clique em cada botao (IDs 1 a 10)
+   WM_DESTROY = encerra o programa ao fechar a janela */
 
 LRESULT CALLBACK MenuProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 {
     switch(msg)
     {
 
-    case WM_CREATE:
+    case WM_CREATE: /* aqui criamos todos os botoes do menu */
     {
         int bx = 36;
         int bw = 328;
@@ -664,12 +741,12 @@ LRESULT CALLBACK MenuProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 
 
 
-    case WM_COMMAND:
+    case WM_COMMAND: /* clique em um botao: LOWORD(wp) traz o ID do botao */
 
         switch(LOWORD(wp))
         {
 
-            case 1:
+            case 1: /* Inserir Item - abre formulario manual */
 
                 CreateWindow(
                     "JanelaInserir",
@@ -683,7 +760,7 @@ LRESULT CALLBACK MenuProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 
 
 
-            case 2:
+            case 2: /* Cadastrar Similaridade */
 
 				CreateWindow(
 					 "JanelaSimilaridade",
@@ -697,7 +774,7 @@ LRESULT CALLBACK MenuProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 
 
 
-            case 3:
+            case 3: /* Buscar Similares */
 
 				CreateWindow(
 					 "JanelaBuscar",
@@ -711,7 +788,7 @@ LRESULT CALLBACK MenuProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 
 
 
-            case 4:
+            case 4: /* Verificar Existencia */
 
                 CreateWindow(
                     "JanelaVerificar",
@@ -725,7 +802,7 @@ LRESULT CALLBACK MenuProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 
 
 
-            case 5:
+            case 5: /* Listar Itens */
 
                 if(!existe_itens_ativos())
                 {
@@ -743,7 +820,7 @@ LRESULT CALLBACK MenuProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 
                 return 0;
 
-            case 7:
+            case 7: /* Contar Propriedade */
 
                 CreateWindow(
                     "JanelaContar",
@@ -755,7 +832,7 @@ LRESULT CALLBACK MenuProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 
                 return 0;
 
-            case 8:
+            case 8: /* Remover Menos Raros */
 
                 CreateWindow(
                     "JanelaRemover",
@@ -769,12 +846,12 @@ LRESULT CALLBACK MenuProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 
 
 
-            case 9:
+            case 9: /* Sair */
 
                 DestroyWindow(hwnd);
                 return 0;
 
-			case 10:
+			case 10: /* botao "+" - importar itens e similaridades de um .txt */
 
 			    importar_de_arquivo(hwnd);
 			    return 0;
@@ -784,7 +861,7 @@ LRESULT CALLBACK MenuProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 
 
 
-    case WM_DESTROY:
+    case WM_DESTROY: /* usuario fechou a janela principal */
         PostQuitMessage(0);
         return 0;
     }
@@ -798,13 +875,15 @@ LRESULT CALLBACK MenuProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 /* ====================== */
 /* JANELA INSERIR ITEM    */
 /* ====================== */
+/* Coleta nome, dono, propriedade, raridade e pontos do contorno.
+   Botao 101 (+) adiciona um ponto; botao 100 (Salvar) chama inserir_item_gui. */
 
 LRESULT CALLBACK InserirProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 {
     switch(msg)
     {
 
-    case WM_CREATE:
+    case WM_CREATE: /* cria labels, campos EDIT e botoes da tela */
 
         pontosInseridos = 0;
 
@@ -930,7 +1009,7 @@ LRESULT CALLBACK InserirProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 
     case WM_COMMAND:
 
-        if(LOWORD(wp)==101)
+        if(LOWORD(wp)==101) /* botao "+" : guarda coordenada X,Y no vetor pontosInserir */
         {
             char xTxt[20];
             char yTxt[20];
@@ -970,7 +1049,7 @@ LRESULT CALLBACK InserirProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
             return 0;
         }
 
-        if(LOWORD(wp)==100)
+        if(LOWORD(wp)==100) /* botao Salvar: valida campos e insere na arvore/grafo */
         {
             char nome[100];
             char dono[100];
@@ -1046,12 +1125,19 @@ LRESULT CALLBACK InserirProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 
     return DefWindowProc(hwnd,msg,wp,lp);
 }
+
+/* ====================== */
+/* JANELA SIMILARIDADE    */
+/* ====================== */
+/* Liga dois itens existentes com um peso (aresta no grafo de similaridade).
+   Os combos listam apenas itens ativos; Salvar (ID 200) chama cadastrar_similaridade_gui. */
+
 LRESULT CALLBACK SimilaridadeProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 {
 	switch(msg)
 	{
 	
-		case WM_CREATE:
+		case WM_CREATE: /* monta combos de itens e campo de peso */
 		
 		CreateWindow("STATIC","ID 1:",
 		WS_VISIBLE|WS_CHILD,
@@ -1109,7 +1195,7 @@ LRESULT CALLBACK SimilaridadeProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 		
 		case WM_COMMAND:
 			
-		if(LOWORD(wp)==200)
+		if(LOWORD(wp)==200) /* Salvar: le ids selecionados e registra a similaridade */
 		{
 			char p[20];
 			
@@ -1160,12 +1246,19 @@ LRESULT CALLBACK SimilaridadeProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 	
 	return DefWindowProc(hwnd,msg,wp,lp);
 }
+
+/* ====================== */
+/* JANELA BUSCAR          */
+/* ====================== */
+/* A partir de um item base, lista similares com peso >= minimo,
+   ignorando itens de um dono escolhido. Botao 300 chama buscar_similares_gui. */
+
 LRESULT CALLBACK BuscarProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 {
 	switch(msg)
 	{
 	
-		case WM_CREATE:
+		case WM_CREATE: /* preenche combos com itens e donos distintos */
 		
 		CreateWindow("STATIC","Item base:",
 		WS_VISIBLE|WS_CHILD,
@@ -1243,7 +1336,7 @@ LRESULT CALLBACK BuscarProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 		
 		case WM_COMMAND:
 		
-		if(LOWORD(wp)==300)
+		if(LOWORD(wp)==300) /* Buscar: monta resultado e exibe em MessageBox */
 		{
 			char b[20];
 			char j[100];
@@ -1298,11 +1391,16 @@ LRESULT CALLBACK BuscarProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 	return DefWindowProc(hwnd,msg,wp,lp);
 }
 
+/* ====================== */
+/* JANELA VERIFICAR       */
+/* ====================== */
+/* Busca um nome na arvore binaria. Botao 400 chama verificar_existencia_gui. */
+
 LRESULT CALLBACK VerificarProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 {
     switch(msg)
     {
-    case WM_CREATE:
+    case WM_CREATE: /* campo de texto para o nome do item */
 
         CreateWindow("STATIC","Nome do item:",
         WS_VISIBLE|WS_CHILD,
@@ -1324,7 +1422,7 @@ LRESULT CALLBACK VerificarProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 
     case WM_COMMAND:
 
-        if(LOWORD(wp)==400)
+        if(LOWORD(wp)==400) /* Verificar: consulta a arvore pelo nome digitado */
         {
             char nome[100];
             GetWindowText(campoVerificarNome,nome,100);
@@ -1354,11 +1452,17 @@ LRESULT CALLBACK VerificarProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
     return DefWindowProc(hwnd,msg,wp,lp);
 }
 
+/* ====================== */
+/* JANELA LISTAR          */
+/* ====================== */
+/* Mostra todos os itens em uma listbox, com ordenacao alfabetica ou por raridade.
+   Duplo clique ou "Ver detalhes" abre as informacoes completas do item. */
+
 LRESULT CALLBACK ListarProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 {
     switch(msg)
     {
-    case WM_CREATE:
+    case WM_CREATE: /* combo de ordenacao, listbox e botoes de acao */
     {
         CreateWindow(
         "STATIC","Ordenar por:",
@@ -1407,7 +1511,7 @@ LRESULT CALLBACK ListarProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 
     case WM_COMMAND:
 
-        if(HIWORD(wp)==CBN_SELCHANGE && LOWORD(wp)==ID_COMBO_ORDEM)
+        if(HIWORD(wp)==CBN_SELCHANGE && LOWORD(wp)==ID_COMBO_ORDEM) /* mudou Alfabetico/Raridade */
         {
             HWND comboOrdem = GetDlgItem(hwnd, ID_COMBO_ORDEM);
             int modo = SendMessage(comboOrdem, CB_GETCURSEL, 0, 0);
@@ -1444,11 +1548,17 @@ LRESULT CALLBACK ListarProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
     return DefWindowProc(hwnd,msg,wp,lp);
 }
 
+/* ====================== */
+/* JANELA CONTAR          */
+/* ====================== */
+/* Conta quantos itens ativos possuem a mesma propriedade magica.
+   Botao 700 chama contar_propriedade_gui. */
+
 LRESULT CALLBACK ContarProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 {
     switch(msg)
     {
-    case WM_CREATE:
+    case WM_CREATE: /* campo para digitar a propriedade magica */
 
         CreateWindow("STATIC","Propriedade magica:",
         WS_VISIBLE|WS_CHILD,
@@ -1470,7 +1580,7 @@ LRESULT CALLBACK ContarProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 
     case WM_COMMAND:
 
-        if(LOWORD(wp)==700)
+        if(LOWORD(wp)==700) /* Contar: percorre itens[] e soma os que batem com a propriedade */
         {
             char prop[100];
             GetWindowText(campoPropriedade,prop,100);
@@ -1498,11 +1608,17 @@ LRESULT CALLBACK ContarProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
     return DefWindowProc(hwnd,msg,wp,lp);
 }
 
+/* ====================== */
+/* JANELA REMOVER         */
+/* ====================== */
+/* Remove da arvore e do grafo os itens com raridade menor que o limite informado.
+   Botao 800 chama remover_menos_raros_gui. */
+
 LRESULT CALLBACK RemoverProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 {
     switch(msg)
     {
-    case WM_CREATE:
+    case WM_CREATE: /* campo para a raridade minima de corte */
 
         CreateWindow("STATIC","Raridade minima:",
         WS_VISIBLE|WS_CHILD,
@@ -1524,7 +1640,7 @@ LRESULT CALLBACK RemoverProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 
     case WM_COMMAND:
 
-        if(LOWORD(wp)==800)
+        if(LOWORD(wp)==800) /* Remover: desativa itens abaixo do limite e limpa a arvore */
         {
             char rar[20];
             GetWindowText(campoRaridadeMin,rar,20);
