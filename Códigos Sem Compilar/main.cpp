@@ -118,6 +118,18 @@ int id_item_ativo_pelo_combo(int sel)
     return -1;
 }
 
+/* Preenche um combo com itens ativos, opcionalmente excluindo um id (evita similaridade consigo mesmo) */
+void preencher_combo_itens(HWND combo, int idExcluir)
+{
+    SendMessage(combo, CB_RESETCONTENT, 0, 0);
+
+    for(int i=0; i<N; i++)
+    {
+        if(itens[i].ativo && i != idExcluir)
+            SendMessage(combo, CB_ADDSTRING, 0, (LPARAM)itens[i].nome.c_str());
+    }
+}
+
 /* Le uma linha "X Y" e separa as duas coordenadas (usado na importacao de arquivo) */
 bool ler_ponto(const string &linha, int &x, int &y)
 {
@@ -1162,14 +1174,8 @@ LRESULT CALLBACK SimilaridadeProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 	    120,70,150,200,
 	    hwnd,NULL,NULL,NULL);
 	    
-	    for(int i=0; i<N; i++)
-		{
-		    if(itens[i].ativo)
-		    {
-		        SendMessage(campoId1, CB_ADDSTRING, 0, (LPARAM)itens[i].nome.c_str());
-		        SendMessage(campoId2, CB_ADDSTRING, 0, (LPARAM)itens[i].nome.c_str());
-		    }
-		}
+	    preencher_combo_itens(campoId1, -1);
+	    preencher_combo_itens(campoId2, -1);
 		
 		
 		CreateWindow("STATIC","Peso:",
@@ -1194,6 +1200,14 @@ LRESULT CALLBACK SimilaridadeProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 		
 		
 		case WM_COMMAND:
+
+		if(HIWORD(wp)==CBN_SELCHANGE && (HWND)lp==campoId1)
+		{
+			int sel1 = SendMessage(campoId1, CB_GETCURSEL, 0, 0);
+			int idExcluir = (sel1 == CB_ERR) ? -1 : id_item_ativo_pelo_combo(sel1);
+			preencher_combo_itens(campoId2, idExcluir);
+			return 0;
+		}
 			
 		if(LOWORD(wp)==200) /* Salvar: le ids selecionados e registra a similaridade */
 		{
@@ -1205,13 +1219,19 @@ LRESULT CALLBACK SimilaridadeProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 			
 			if(sel1 == -1 || sel2 == -1)
 		    {
-		        MessageBox(hwnd,"Selecione os itens","Erro",MB_OK);
+		        MessageBox(hwnd,"Selecione os dois itens.","Erro",MB_OK);
 		        return 0;
 		    }
 			
 			int id1 = id_item_ativo_pelo_combo(sel1);
 			int id2 = id_item_ativo_pelo_combo(sel2);
 			int peso=atoi(p);
+
+			if(id1 == id2)
+			{
+			    MessageBox(hwnd,"Selecione dois itens diferentes.","Erro",MB_OK);
+			    return 0;
+			}
 
 			if(campoVazio(p))
 			{

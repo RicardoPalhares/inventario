@@ -205,6 +205,9 @@ int inserir_item_gui(treenodeptr &root, const string &nome, const string &dono, 
 }
 
 bool cadastrar_similaridade_gui(int id1, int id2, int peso) {
+    if (id1 == id2)
+        return false;
+
     if ((id1 >= 0 && id1 < N) && (id2 >= 0 && id2 < N) && itens[id1].ativo && itens[id2].ativo) {
         Aresta a1, a2;
         a1.id1 = id1;
@@ -356,7 +359,10 @@ void cadastrar_similaridade(){
 
     cout << "Insira os ids dos item a serem cadastrados com similaridade: " << endl;
     cin >> id1 >> id2;
-    if((id1 < N && id1 >= 0) && (id2 < N && id2 >= 0)){
+    if(id1 == id2){
+        cout << "Os dois itens devem ser diferentes." << endl;
+    }
+    else if((id1 < N && id1 >= 0) && (id2 < N && id2 >= 0)){
         cout << "Itens a serem cadastrados: " << id1 << " -> " << itens[id1].nome << ", " << id2 << " -> " << itens[id2].nome << endl;
         cout << "Tem certeza que deseja cadastrar esses itens? [y/n]" << endl;
         cin >> op;
