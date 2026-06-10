@@ -1,8 +1,11 @@
-# Compilados
-*.exe
-*.o
-*.res
-main
+# Compilados (dentro da pasta de codigo-fonte)
+Códigos Sem Compilar/*.exe
+Códigos Sem Compilar/*.o
+Códigos Sem Compilar/*.res
+Códigos Sem Compilar/main
+
+# Executavel na raiz fica versionado para facilitar a instalacao
+!inventario.exe
 
 # Falcon C++ (gerados no build)
 Makefile.mak

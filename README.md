@@ -1,31 +1,48 @@
 # Inventario
 
+## Instalacao rapida
+
+Baixe o repositorio e execute o arquivo **`inventario.exe`** na raiz do projeto.
+Nao precisa compilar para usar o programa.
+
+## Codigo-fonte
+
+Os arquivos para compilar estao na pasta **`Códigos Sem Compilar/`**:
+
+- `main.cpp` - interface grafica (janelas e botoes)
+- `opcoes_menu.cpp` / `opcoes_menu.h` - logica do inventario (arvore, grafo, validacoes)
+- `inventario.fpj` / `inventario.layout` - projeto Falcon C++
+- `EXEMPLE.txt` - exemplo para importar itens pelo botao "+"
+
 Se caso queira testar pelo opcoes_menu sem layout
+
 ## Compilar e rodar
 
-No terminal
+No terminal, dentro da pasta de codigo:
+
 ```
+cd "Códigos Sem Compilar"
 
-# Compilar
-g++ main.cpp opcoes_menu.cpp -o main
+# Compilar (gera o executavel na raiz do projeto)
+g++ main.cpp opcoes_menu.cpp -o ../inventario.exe -mwindows
 
-# Rodar 
-./main
-
+# Rodar
+cd ..
+./inventario.exe
 ```
 
 ## Salvar no Github
 
-No terminal
-```
+Use o `publicar.bat` na raiz do projeto, ou no terminal:
 
+```
 git add .
 git commit -m "mensagem"
 git push
-
 ```
 
 ## Caso de Teste
+
 ```
 1
 Espada Flamejante
