@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Layout>
+	<Files>
+		<File Name="main.cpp" Top="No" Tabpos="1" TopLine="1">
+			<Cursor Line="4" Column="7"/>
+		</File>
+		<File Name="opcoes_menu.cpp" Top="Yes" Tabpos="2" TopLine="352">
+			<Cursor Line="2" Column="18"/>
+		</File>
+		<File Name="opcoes_menu.h" Top="No" Tabpos="3" TopLine="1">
+			<Cursor Line="1" Column="1"/>
+		</File>
+	</Files>
+</Layout>
