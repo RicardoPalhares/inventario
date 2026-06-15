@@ -204,19 +204,55 @@ int inserir_item_gui(treenodeptr &root, const string &nome, const string &dono, 
     return 1;
 }
 
+static void remover_arestas_item(int id)
+{
+    grafo[id].clear();
+
+    for (int i = 0; i < N; i++) {
+        list<Aresta>::iterator it = grafo[i].begin();
+
+        while (it != grafo[i].end()) {
+            if (it->id2 == id)
+                it = grafo[i].erase(it);
+            else
+                ++it;
+        }
+    }
+}
+
 bool cadastrar_similaridade_gui(int id1, int id2, int peso) {
     if (id1 == id2)
         return false;
 
     if ((id1 >= 0 && id1 < N) && (id2 >= 0 && id2 < N) && itens[id1].ativo && itens[id2].ativo) {
-        Aresta a1, a2;
-        a1.id1 = id1;
-        a1.id2 = id2;
-        a1.peso = peso;
+        list<Aresta>::iterator it;
+
+        for (it = grafo[id1].begin(); it != grafo[id1].end(); ++it) {
+            if (it->id2 == id2) {
+                it->peso = peso;
+                break;
+            }
+        }
+
+        if (it == grafo[id1].end()) {
+            Aresta a1;
+            a1.id1 = id1;
+            a1.id2 = id2;
+            a1.peso = peso;
+            grafo[id1].push_back(a1);
+        }
+
+        for (it = grafo[id2].begin(); it != grafo[id2].end(); ++it) {
+            if (it->id2 == id1) {
+                it->peso = peso;
+                return true;
+            }
+        }
+
+        Aresta a2;
         a2.id1 = id2;
         a2.id2 = id1;
         a2.peso = peso;
-        grafo[id1].push_back(a1);
         grafo[id2].push_back(a2);
         return true;
     }
@@ -537,6 +573,7 @@ string remover_menos_raros_gui(treenodeptr &root, int R) {
     for (int i = 0; i < N; i++) {
         if (itens[i].ativo && itens[i].raridade < R) {
             remover_nome(root, itens[i].nome);
+            remover_arestas_item(i);
             itens[i].ativo = false;
             removidos++;
         }
