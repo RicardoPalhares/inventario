@@ -99,24 +99,18 @@ luz
 0 2
 
 2
-0 2
-y
+Espada Flamejante
 90
-
-2
-1 3
-y
+Cajado da Tempestade
+Manto das Sombras
 55
-
-2
-0 1
-y
+Adaga Envenenada
+Espada Flamejante
 30
-
-2
-2 4
-y
+Manto das Sombras
+Cajado da Tempestade
 70
+Escudo Solar
 
 3
 0

@@ -223,6 +223,23 @@ bool cadastrar_similaridade_gui(int id1, int id2, int peso) {
     return false;
 }
 
+int id_item_pelo_nome(const string &nome) {
+    for (int i = 0; i < N; i++) {
+        if (itens[i].ativo && itens[i].nome == nome)
+            return i;
+    }
+
+    string base = nome_base(nome);
+    int encontrado = -1;
+
+    for (int i = 0; i < N; i++) {
+        if (itens[i].ativo && nome_base(itens[i].nome) == base)
+            encontrado = i;
+    }
+
+    return encontrado;
+}
+
 string buscar_similares_gui(int C, int x, const string &j) {
     string texto = "";
     bool encontrou = false;
