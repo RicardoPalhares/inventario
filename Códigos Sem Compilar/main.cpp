@@ -1,3 +1,10 @@
+//Integrantes: Leonardo Lopes Prado - 809
+// Gabriel Gregório de Olveira - 2324
+// Isaac Assis Costa Lopes - 2314 
+// Ricardo de Oliveira Palhares - 2294
+// Gabriel Genghini Craveiro - 2274
+// Marcus Vinicius Duarte - 2296
+
 /*
  * main.cpp - Interface grafica do inventario (Windows API)
  *
@@ -313,7 +320,9 @@ bool linha_cabecalho(const string& linha)
         || linha.find("Formato") != string::npos
         || linha.find("botao") != string::npos
         || linha.find("importar") != string::npos
-        || linha.find("mesmo arquivo") != string::npos;
+        || linha.find("mesmo arquivo") != string::npos
+        || linha.find("Formato:") != string::npos
+        || linha.find("Ou em uma linha") != string::npos;
 }
 
 /* Verifica se a linha contem somente digitos (peso da similaridade) */
@@ -331,33 +340,48 @@ bool linha_apenas_numero(const string& linha)
     return true;
 }
 
-/* Le uma linha "id1 id2" da secao de similaridades */
-bool ler_par_ids(const string& linha, int& id1, int& id2)
+/* Remove espacos no inicio e no fim de um texto */
+string trim_texto(const string& s)
 {
-    size_t pos = linha.find(' ');
-    if(pos == string::npos)
+    int ini = 0;
+    int fim = (int)s.size() - 1;
+
+    while(ini <= fim && (s[ini]==' ' || s[ini]=='\t'))
+        ini++;
+    while(fim >= ini && (s[fim]==' ' || s[fim]=='\t'))
+        fim--;
+
+    if(ini > fim)
+        return "";
+
+    return s.substr(ini, fim - ini + 1);
+}
+
+/* Divide uma linha "nome1 ; peso ; nome2" em tres partes */
+bool ler_similaridade_linha(const string& linha, string& nome1, int& peso, string& nome2)
+{
+    size_t p1 = linha.find(';');
+    if(p1 == string::npos)
         return false;
 
-    string s1 = linha.substr(0, pos);
-    string s2 = linha.substr(pos + 1);
-
-    if(s2.find(' ') != string::npos || s1.empty() || s2.empty())
+    size_t p2 = linha.find(';', p1 + 1);
+    if(p2 == string::npos)
         return false;
 
-    for(int i=0; i<(int)s1.size(); i++)
+    nome1 = trim_texto(linha.substr(0, p1));
+    string pesoTxt = trim_texto(linha.substr(p1 + 1, p2 - p1 - 1));
+    nome2 = trim_texto(linha.substr(p2 + 1));
+
+    if(nome1.empty() || nome2.empty() || pesoTxt.empty())
+        return false;
+
+    for(int i=0; i<(int)pesoTxt.size(); i++)
     {
-        if(s1[i] < '0' || s1[i] > '9')
+        if(pesoTxt[i] < '0' || pesoTxt[i] > '9')
             return false;
     }
 
-    for(int i=0; i<(int)s2.size(); i++)
-    {
-        if(s2[i] < '0' || s2[i] > '9')
-            return false;
-    }
-
-    id1 = atoi(s1.c_str());
-    id2 = atoi(s2.c_str());
+    peso = atoi(pesoTxt.c_str());
     return true;
 }
 
@@ -492,15 +516,16 @@ void importar_itens_de_texto(const string& texto, int& importados, int& rejeitad
     }
 }
 
-/* Le pares id1 id2 seguidos de uma linha com o peso da aresta no grafo */
+/* Le similaridades por nome: "item1 ; peso ; item2" ou 3 linhas (item1, peso, item2) */
 void importar_similaridades_de_texto(const string& texto, int& importadas)
 {
     string conteudo = texto;
     conteudo += '\n';
     string linha = "";
-    int id1 = 0;
-    int id2 = 0;
-    bool aguardandoPeso = false;
+    string nome1 = "";
+    string nome2 = "";
+    int peso = 0;
+    int fase = 0;
 
     importadas = 0;
 
@@ -508,30 +533,64 @@ void importar_similaridades_de_texto(const string& texto, int& importadas)
     {
         if(conteudo[i]=='\n')
         {
-            if(linha=="")
+            linha = trim_texto(linha);
+
+            if(linha != "")
             {
-                aguardandoPeso = false;
-            }
-            else if(linha_cabecalho(linha))
-            {
-                aguardandoPeso = false;
-            }
-            else if(!aguardandoPeso)
-            {
-                if(ler_par_ids(linha, id1, id2))
-                    aguardandoPeso = true;
-            }
-            else
-            {
-                if(linha_apenas_numero(linha))
+                if(linha_cabecalho(linha))
                 {
-                    int peso = atoi(linha.c_str());
-
-                    if(cadastrar_similaridade_gui(id1, id2, peso))
-                        importadas++;
+                    fase = 0;
+                    nome1 = "";
+                    nome2 = "";
                 }
+                else if(linha.find(';') != string::npos)
+                {
+                    if(ler_similaridade_linha(linha, nome1, peso, nome2))
+                    {
+                        int id1 = id_item_pelo_nome(nome1);
+                        int id2 = id_item_pelo_nome(nome2);
 
-                aguardandoPeso = false;
+                        if(id1 != -1 && id2 != -1 && cadastrar_similaridade_gui(id1, id2, peso))
+                            importadas++;
+                    }
+
+                    fase = 0;
+                    nome1 = "";
+                    nome2 = "";
+                }
+                else if(fase == 0)
+                {
+                    nome1 = linha;
+                    fase = 1;
+                }
+                else if(fase == 1)
+                {
+                    if(linha_apenas_numero(linha))
+                    {
+                        peso = atoi(linha.c_str());
+                        fase = 2;
+                    }
+                    else
+                    {
+                        fase = 0;
+                        nome1 = "";
+                        nome2 = "";
+                    }
+                }
+                else if(fase == 2)
+                {
+                    nome2 = linha;
+
+                    int id1 = id_item_pelo_nome(nome1);
+                    int id2 = id_item_pelo_nome(nome2);
+
+                    if(id1 != -1 && id2 != -1 && cadastrar_similaridade_gui(id1, id2, peso))
+                        importadas++;
+
+                    fase = 0;
+                    nome1 = "";
+                    nome2 = "";
+                }
             }
 
             linha = "";
