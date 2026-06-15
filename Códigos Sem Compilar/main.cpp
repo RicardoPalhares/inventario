@@ -1,5 +1,5 @@
 //Integrantes: Leonardo Lopes Prado - 809
-// Gabriel GregÛrio de Olveira - 2324
+// Gabriel Gregùrio de Olveira - 2324
 // Isaac Assis Costa Lopes - 2314 
 // Ricardo de Oliveira Palhares - 2294
 // Gabriel Genghini Craveiro - 2274
@@ -125,6 +125,15 @@ int id_item_ativo_pelo_combo(int sel)
     return -1;
 }
 
+/* Le o id gravado no combo (funciona mesmo quando a lista exclui um item) */
+int id_item_pelo_combo(HWND combo, int sel)
+{
+    if(sel < 0 || !combo)
+        return -1;
+
+    return (int)SendMessage(combo, CB_GETITEMDATA, sel, 0);
+}
+
 /* Preenche um combo com itens ativos, opcionalmente excluindo um id (evita similaridade consigo mesmo) */
 void preencher_combo_itens(HWND combo, int idExcluir)
 {
@@ -133,7 +142,10 @@ void preencher_combo_itens(HWND combo, int idExcluir)
     for(int i=0; i<N; i++)
     {
         if(itens[i].ativo && i != idExcluir)
-            SendMessage(combo, CB_ADDSTRING, 0, (LPARAM)itens[i].nome.c_str());
+        {
+            int idx = SendMessage(combo, CB_ADDSTRING, 0, (LPARAM)itens[i].nome.c_str());
+            SendMessage(combo, CB_SETITEMDATA, idx, i);
+        }
     }
 }
 
@@ -1263,7 +1275,7 @@ LRESULT CALLBACK SimilaridadeProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 		if(HIWORD(wp)==CBN_SELCHANGE && (HWND)lp==campoId1)
 		{
 			int sel1 = SendMessage(campoId1, CB_GETCURSEL, 0, 0);
-			int idExcluir = (sel1 == CB_ERR) ? -1 : id_item_ativo_pelo_combo(sel1);
+			int idExcluir = (sel1 == CB_ERR) ? -1 : id_item_pelo_combo(campoId1, sel1);
 			preencher_combo_itens(campoId2, idExcluir);
 			return 0;
 		}
@@ -1282,8 +1294,8 @@ LRESULT CALLBACK SimilaridadeProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 		        return 0;
 		    }
 			
-			int id1 = id_item_ativo_pelo_combo(sel1);
-			int id2 = id_item_ativo_pelo_combo(sel2);
+			int id1 = id_item_pelo_combo(campoId1, sel1);
+			int id2 = id_item_pelo_combo(campoId2, sel2);
 			int peso=atoi(p);
 
 			if(id1 == id2)
@@ -1374,11 +1386,7 @@ LRESULT CALLBACK BuscarProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 	    120,110,150,200,
 	    hwnd,NULL,NULL,NULL);
 
-	    for(int i=0; i<N; i++)
-		{
-		    if(itens[i].ativo)
-		        SendMessage(campoBase, CB_ADDSTRING, 0, (LPARAM)itens[i].nome.c_str());
-		}
+	    preencher_combo_itens(campoBase, -1);
 
 		if(SendMessage(campoBase, CB_GETCOUNT, 0, 0) > 0)
 		    SendMessage(campoBase, CB_SETCURSEL, 0, 0);
@@ -1424,7 +1432,7 @@ LRESULT CALLBACK BuscarProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp)
 			
 			GetWindowText(campoMin,b,20);
 			
-			int C = id_item_ativo_pelo_combo(SendMessage(campoBase, CB_GETCURSEL, 0, 0));
+			int C = id_item_pelo_combo(campoBase, SendMessage(campoBase, CB_GETCURSEL, 0, 0));
 			int selDono = SendMessage(campoIgnorar, CB_GETCURSEL, 0, 0);
 
 			if(C == -1)
